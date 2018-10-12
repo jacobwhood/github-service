@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const githubTools = require('../util/index.js');
 const app = express();
-const request = require('request');
 const axios = require('axios');
 
 app.use(cors());
@@ -17,9 +16,7 @@ app.get('/', (req, res) => {
 
 app.post('/api/github/clonerepo', (req, res) => {
   let { username, repoName, gitUrl } = req.body;
-  // makedirectory for user
-  // clone new repo
-  // retrieve the directory structure
+  
   githubTools.MakeDirForUser(username, repoName);
 
   if (githubTools.UserRepoHasBeenCloned(username, repoName)) {
@@ -35,6 +32,7 @@ app.post('/api/github/clonerepo', (req, res) => {
       });
     });
   }
+
 });
 
 app.get('/api/github/gists/get', (req, res) => {
@@ -66,8 +64,7 @@ app.get('/api/github/gists/get', (req, res) => {
 });
 
 app.post('/api/github/gists/update', (req, res) => {
-
-    
+  
 });
 
 app.post('/api/github/gists/create', (req, res) => {
