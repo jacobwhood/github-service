@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const githubTools = require('../util/index.js');
 const app = express();
 
 app.use(cors());
@@ -14,10 +15,24 @@ app.get('/', (req, res) => {
 
 app.post('/api/github/clonerepo', (req, res) => {
   let { username, repoName, gitUrl } = req.body;
+  // makedirectory for user
+  // clone new repo
+  // retrieve the directory structure
+  githubTools.MakeDirForUser(username, repoName);
 
-
-
-  res.send(`repo name passed in: ${repoName} for this url: ${gitUrl}`).status(200);  
+  if (githubTools.UserRepoHasBeenCloned(username, repoName)) {
+    githubTools.RetrieveRepoDirectoryStructure(username, repoName, (fileStructure) => {
+      console.log('file structure of repo: ', fileStructure);
+      res.send(fileStructure);
+    });
+  } else {
+    githubTools.CloneUserRepo(username, repoName, gitUrl, (username, repoName) => {
+      githubTools.RetrieveRepoDirectoryStructure(username, repoName, (fileStructure) => {
+        console.log('file structure of repo: ', fileStructure);
+        res.send(fileStructure);
+      });
+    });
+  }
 });
 
 const port = process.env.PORT || 3000;
