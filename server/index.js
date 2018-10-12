@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const githubTools = require('../util/index.js');
 const app = express();
+const request = require('request');
+const axios = require('axios');
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -33,6 +35,76 @@ app.post('/api/github/clonerepo', (req, res) => {
       });
     });
   }
+});
+
+app.get('/api/github/gists/get', (req, res) => {
+  let { username, accessToken } = req.body;
+  let url = `https://api.github.com/users/${username}/gists`;
+  let gists = [];
+
+  let config = {
+    headers: { 'User-Agent': 'athesio' },
+    params: { access_token: accessToken }
+  }
+
+  axios.get(url, config)
+    .then( ({ data }) => {
+      data.forEach(gist => {
+        console.log('gist: ', gist);
+        let { id, description, html_url } = gist;
+        let fileName = Object.keys(gist.files);
+        let language = gist.files[fileName].language;
+        description = description === null ? '' : description;
+        let gistObj = { id: id, description: description, fileName: fileName, url: html_url,  language: language };
+        if (language.toLowerCase() === 'javascript') gists.push(gistObj);
+        console.log('gist: ', gistObj);
+      });
+    
+    res.send(gists);
+    })
+    .catch(console.log);
+});
+
+app.post('/api/github/gists/update', (req, res) => {
+
+    
+});
+
+app.post('/api/github/gists/create', (req, res) => {
+  let { username, accessToken, description } = req.body;
+  accessToken = '52e8f8c2f6ae89e89332750b597fc998191ce2f0';
+  username = 'jacobwhood';
+  description = 'lasdjflkasdjflasdfjalsf';
+  let fileName = 'index.js';
+  let content = 'console.log("hello world!!")';
+  let url = `https://api.github.com/gists`;
+  let gists = [];
+  let fileObj = {};
+  fileObj[fileName] = {
+    content: content
+  }
+  console.log('file object :', fileObj);
+
+  let config = {
+    headers: { 
+      'User-Agent': 'athesio',
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    data: {
+      description: description,
+      public: true,
+      files: fileObj
+    }
+    
+  }
+  console.log('config object: ', config);
+
+  axios.post(url, config.data, {headers: config.headers})
+    .then( ({ data }) => {
+      console.log('after successful post: ', data);
+    })
+    .catch(console.log)
 });
 
 const port = process.env.PORT || 3000;
