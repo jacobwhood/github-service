@@ -71,19 +71,11 @@ app.post('/api/github/gists/update', (req, res) => {
 });
 
 app.post('/api/github/gists/create', (req, res) => {
-  let { username, accessToken, description } = req.body;
-  accessToken = '52e8f8c2f6ae89e89332750b597fc998191ce2f0';
-  username = 'jacobwhood';
-  description = 'lasdjflkasdjflasdfjalsf';
-  let fileName = 'index.js';
-  let content = 'console.log("hello world!!")';
+  let { username, accessToken, description, fileName, content } = req.body;
+  
   let url = `https://api.github.com/gists`;
-  let gists = [];
   let fileObj = {};
-  fileObj[fileName] = {
-    content: content
-  }
-  console.log('file object :', fileObj);
+  fileObj[fileName] = { content: content };
 
   let config = {
     headers: { 
@@ -91,18 +83,13 @@ app.post('/api/github/gists/create', (req, res) => {
       'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json'
     },
-    data: {
-      description: description,
-      public: true,
-      files: fileObj
-    }
-    
+    data: { description: description, public: true, files: fileObj }
   }
-  console.log('config object: ', config);
 
   axios.post(url, config.data, {headers: config.headers})
     .then( ({ data }) => {
       console.log('after successful post: ', data);
+      res.send('successfully created gist').status(200);
     })
     .catch(console.log)
 });
