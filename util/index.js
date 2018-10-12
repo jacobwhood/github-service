@@ -33,7 +33,6 @@ module.exports.CloneUserRepo = (username, repoName, gitUrl, cb) => {
 };
 
 module.exports.RetrieveRepoDirectoryStructure = (username, repoName, cb) => {
-  console.log('cb: ', cb);
   if (this.UserRepoHasBeenCloned(username, repoName)) {
     console.log(`looking in this directory: ./repos/${username}/${repoName}`);
     glob(`./repos/${username}/${repoName}`, (err, result) => {
