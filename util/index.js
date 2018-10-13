@@ -10,6 +10,60 @@ const walkSync = (dir, filelist = []) => {
       filelist.concat(path.join(dir, file))[0])
 };
 
+module.exports.filterDirectory = (fileDir, repoName) => {
+  const resultArr = [];
+
+  const traverse = (arr) => {
+    if (arr.length === 0) {
+      return;
+    } else {
+      for (let i = 0; i < arr.length; i++) {
+        if (Array.isArray(arr[i])) {
+          traverse(arr[i]);
+        } else {
+          if (!arr[i].includes('/.git/')) {
+            // console.log(arr[i]);
+            //arr.splice(i, 1);
+            resultArr.push(arr[i]);
+          }
+        }
+      }
+    }
+  };
+  traverse(fileDir);
+  console.log(resultArr);
+
+  const result = {};
+  result[repoName] = {};
+  const repoObj = result[repoName];
+  resultArr.forEach(element => {
+    const elArr = element.split(`${repoName}/`);
+    // console.log(elArr[1]);
+    const temp = elArr[1].split('/');
+    const file = temp[temp.length - 1];
+    if (temp.length === 1) {
+      repoObj[file] = `${repoName}/${file}`;
+    } else {
+      let currentFolder = repoObj;
+      for (let i = 0; i < temp.length - 1; i++) {
+        if (!currentFolder[temp[i]]) {
+          currentFolder[temp[i]] = {};
+        }
+        currentFolder = currentFolder[temp[i]];
+      }
+      currentFolder[file]
+    }
+    
+    
+    console.log(elArr[1].split('/'));
+
+  });
+
+  
+
+  return resultArr;
+}
+
 module.exports.UserRepoHasBeenCloned = (username, repoName) => {
   return fs.existsSync(`./repos/${username}/${repoName}`);
 };

@@ -23,13 +23,15 @@ app.post('/api/github/clonerepo', (req, res) => {
   if (githubTools.UserRepoHasBeenCloned(username, repoName)) {
     githubTools.RetrieveRepoDirectoryStructure(username, repoName, (fileStructure) => {
       console.log('file structure of repo: ', fileStructure);
-      res.send(fileStructure);
+      const temp = githubTools.filterDirectory(fileStructure, repoName);
+      res.send(temp);
     });
   } else {
     githubTools.CloneUserRepo(username, repoName, gitUrl, (username, repoName) => {
       githubTools.RetrieveRepoDirectoryStructure(username, repoName, (fileStructure) => {
         console.log('file structure of repo: ', fileStructure);
-        res.send(fileStructure);
+        const temp = githubTools.filterDirectory(fileStructure, repoName);
+        res.send(temp);
       });
     });
   }
