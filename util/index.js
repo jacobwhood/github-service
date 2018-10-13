@@ -3,12 +3,55 @@ const glob = require('glob');
 const { spawn } = require('child_process');
 const path = require('path');
 
-const walkSync = (dir, filelist = []) => {
-  return fs.readdirSync(dir)
-    .map(file => fs.statSync(path.join(dir, file)).isDirectory() ?
-      walkSync(path.join(dir, file), filelist) :
-      filelist.concat(path.join(dir, file))[0])
+// helpers to get and format file structure object
+const flatten = arr => arr.reduce((acc, val) =>
+  acc.concat(Array.isArray(val) ? flatten(val) : val), []);
+
+Array.prototype.flatten = function () {
+  return flatten(this)
 };
+
+const walkSync = dir => fs.readdirSync(dir)
+  .map(file => fs.statSync(path.join(dir, file)).isDirectory() ?
+    walkSync(path.join(dir, file)) :
+    path.join(dir, file).replace(/\\/g, '/')).flatten();
+
+const Treeify = (files) => {
+  var fileTree = {};
+
+  if (files instanceof Array === false) {
+    throw new Error('Expected an Array of file paths, but saw ' + files);
+  }
+
+  function mergePathsIntoFileTree(prevDir, currDir, i, filePath) {
+
+    if (i === filePath.length - 1) {
+      prevDir[currDir] = filePath.join('/');
+    }
+
+    if (!prevDir.hasOwnProperty(currDir)) {
+      prevDir[currDir] = {};
+    }
+
+    return prevDir[currDir];
+  }
+
+  function parseFilePath(filePath) {
+    var fileLocation = filePath.split('/');
+
+    // If file is in root directory, eg 'index.js'
+    if (fileLocation.length === 1) {
+      return (fileTree[fileLocation[0]] = 'file');
+    }
+
+    fileLocation.reduce(mergePathsIntoFileTree, fileTree);
+  }
+
+  files.forEach(parseFilePath);
+
+  return fileTree;
+}
+
 
 module.exports.UserRepoHasBeenCloned = (username, repoName) => {
   return fs.existsSync(`./repos/${username}/${repoName}`);
@@ -43,18 +86,28 @@ module.exports.CloneUserRepo = (username, repoName, gitUrl, cb) => {
 module.exports.RetrieveRepoDirectoryStructure = (username, repoName, cb) => {
   if (this.UserRepoHasBeenCloned(username, repoName)) {
     console.log(`looking in this directory: ./repos/${username}/${repoName}`);
-    cb(walkSync(`./repos/${username}/${repoName}`));
-    // glob(`./repos/${username}/${repoName}`, (err, result) => {
-    //   if (err) {
-    //     console.log('error retrieving file structure: ', err);
-    //     cb([]);
-    //   } else {
-    //     console.log('successfully retrieved file structure: ', result);
-    //     cb(result);
-    //   }
-    // });
+    let filteredFileObj = JSON.stringify(Treeify(walkSync(`./repos/${username}/${repoName}`).filter(path => !path.includes('.git/') && !path.includes('node_modules'))));
+    cb(filteredFileObj);
   } else {
     console.log('indicates repo has not been cloned');
     cb([]);
+  }
+};
+
+module.exports.ReadFileIntoMemory = (username, repoName, filePath, cb) => {
+  if (this.UserRepoHasBeenCloned(username, repoName)) {
+    let file = '';
+    fs.readFile(filePath, (err, contents) => {
+      if (err) {
+        console.log(`error reading file contents at path: ${filePath}`, err);
+        cb(err, null);
+      } else {
+        console.log(`file contents for file contents at path: ${filePath}: `, contents.toString());
+        cb(null, contents.toString());
+      }
+    });
+  } else {
+    console.log(`required repo: ${repoName} for file: ${fileName} has not been cloned.`);
+    cb(null, null);
   }
 };
