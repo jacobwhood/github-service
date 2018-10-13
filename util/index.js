@@ -86,8 +86,9 @@ module.exports.CloneUserRepo = (username, repoName, gitUrl, cb) => {
 module.exports.RetrieveRepoDirectoryStructure = (username, repoName, cb) => {
   if (this.UserRepoHasBeenCloned(username, repoName)) {
     console.log(`looking in this directory: ./repos/${username}/${repoName}`);
-    let filteredFileObj = JSON.stringify(Treeify(walkSync(`./repos/${username}/${repoName}`).filter(path => !path.includes('.git/') && !path.includes('node_modules'))));
-    cb(filteredFileObj);
+    let fileArray = walkSync(`./repos/${username}/${repoName}`).filter(path => !path.includes('.git/') && !path.includes('node_modules'));
+    let filteredFileObj = JSON.stringify(Treeify(fileArray));
+    cb({ fileDirectory: filteredFileObj, fileArray: fileArray });
   } else {
     console.log('indicates repo has not been cloned');
     cb([]);
@@ -102,7 +103,6 @@ module.exports.ReadFileIntoMemory = (username, repoName, filePath, cb) => {
         console.log(`error reading file contents at path: ${filePath}`, err);
         cb(err, null);
       } else {
-        console.log(`file contents for file contents at path: ${filePath}: `, contents.toString());
         cb(null, contents.toString());
       }
     });
