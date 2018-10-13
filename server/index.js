@@ -21,15 +21,13 @@ app.post('/api/github/clonerepo', (req, res) => {
   githubTools.MakeDirForUser(username, repoName);
 
   if (githubTools.UserRepoHasBeenCloned(username, repoName)) {
-    githubTools.RetrieveRepoDirectoryStructure(username, repoName, (fileStructure) => {
-      console.log('file structure of repo: ', fileStructure);
-      res.send(fileStructure);
+    githubTools.RetrieveRepoDirectoryStructure(username, repoName, (directoryInfo) => {
+      res.send(directoryInfo);
     });
   } else {
     githubTools.CloneUserRepo(username, repoName, gitUrl, (username, repoName) => {
-      githubTools.RetrieveRepoDirectoryStructure(username, repoName, (fileStructure) => {
-        console.log('file structure of repo: ', fileStructure);
-        res.send(fileStructure);
+      githubTools.RetrieveRepoDirectoryStructure(username, repoName, (directoryInfo) => {
+        res.send(directoryInfo);
       });
     });
   }
@@ -138,6 +136,20 @@ app.post('/api/github/gists/create', (req, res) => {
     .catch(console.log)
 });
 
+app.get('/api/github/repo/contents/get', (req, res) => {
+  let { filePath, username, repoName } = req.params;
+
+  githubTools.ReadFileIntoMemory(username, repoName, filePath, (err, contents) => {
+    if (err) {
+      console.log('error in githubTools.ReadFileIntoMemory invocation: ', err);
+      res.sendStatus(500);
+    } else {
+      console.log('successfully retrieved file contents at path: ', filePath);
+      res.send(contents);
+    }
+  });
+
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`listening on port: ${port}`));
