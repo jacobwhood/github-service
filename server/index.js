@@ -50,7 +50,6 @@ app.post('/api/github/gists/get', (req, res) => {
   axios.get(url, config)
     .then( ({ data }) => {
       data.forEach(gist => {
-        console.log('gist: ', gist);
         let { id, description, html_url } = gist;
         let fileName = Object.keys(gist.files);
         let language = gist.files[fileName].language;
