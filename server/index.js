@@ -92,10 +92,6 @@ app.post('/api/github/gists/get-single/', (req, res) => {
 
 app.post('/api/github/gists/update', (req, res) => {
   let { id, accessToken, description, fileName, content } = req.body;
-  id = 'ab9c3c3fc2f8a819693fb8a67ecdd97a';
-  accessToken = '5fbdfdf1338c3d7b7f38155dfc8275fd6fbafec4';
-  fileName = 'index.js';
-  content = 'console.log(`update worked fine`);';
   let url = `https://api.github.com/gists/${id}`;
   
   let fileObj = {};
