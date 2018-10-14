@@ -137,7 +137,7 @@ app.post('/api/github/gists/create', (req, res) => {
 });
 
 app.get('/api/github/repo/contents/get', (req, res) => {
-  let { filePath, username, repoName } = req.params;
+  let { filePath, username, repoName } = req.query;
 
   githubTools.ReadFileIntoMemory(username, repoName, filePath, (err, contents) => {
     if (err) {
