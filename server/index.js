@@ -31,7 +31,6 @@ app.post('/api/github/clonerepo', (req, res) => {
       });
     });
   }
-
 });
 
 
@@ -136,6 +135,7 @@ app.post('/api/github/gists/create', (req, res) => {
     .catch(console.log)
 });
 
+
 app.get('/api/github/repo/contents/get', (req, res) => {
   let { filePath, username, repoName } = req.query;
   githubTools.ReadFileIntoMemory(username, repoName, filePath, (err, contents) => {
@@ -147,7 +147,6 @@ app.get('/api/github/repo/contents/get', (req, res) => {
       res.send(contents);
     }
   });
-
 });
 
 const port = process.env.PORT || 3000;
