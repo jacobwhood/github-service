@@ -107,7 +107,7 @@ module.exports.ReadFileIntoMemory = (username, repoName, filePath, cb) => {
       }
     });
   } else {
-    console.log(`required repo: ${repoName} for file: ${fileName} has not been cloned.`);
+    console.log(`required repo: ${repoName} for file: ${filePath} has not been cloned.`);
     cb(null, null);
   }
 };

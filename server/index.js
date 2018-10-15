@@ -49,12 +49,14 @@ app.post('/api/github/gists/get', (req, res) => {
     .then( ({ data }) => {
       data.forEach(gist => {
         let { id, description, html_url } = gist;
-        let fileName = Object.keys(gist.files);
-        let language = gist.files[fileName].language;
+        let fileNames = Object.keys(gist.files);
+        let language = 'javascript';
+        fileNames.forEach(file => {
+          if (gist.files[file].language.toLowerCase() !== 'javascript') language = file.language.toLowerCase()
+        });
         description = description === null ? '' : description;
-        let gistObj = { id: id, description: description, fileName: fileName, url: html_url,  language: language };
+        let gistObj = { id: id, description: description, files: gist.files, url: html_url,  language: language };
         if (language.toLowerCase() === 'javascript') gists.push(gistObj);
-        console.log('gist: ', gistObj);
       });
     
     res.send(gists);
@@ -105,7 +107,6 @@ app.post('/api/github/gists/update', (req, res) => {
 
   axios.patch(url, config.data, { headers: config.headers })
     .then( ({ data }) => {
-      console.log('after successful post: ', data);
       res.send('successfully updated gist').status(200);
     })
     .catch(console.log)
@@ -130,7 +131,6 @@ app.post('/api/github/gists/create', (req, res) => {
 
   axios.post(url, config.data, { headers: config.headers })
     .then( ({ data }) => {
-      console.log('after successful post: ', data);
       res.send('successfully created gist').status(200);
     })
     .catch(console.log)
@@ -138,7 +138,6 @@ app.post('/api/github/gists/create', (req, res) => {
 
 app.get('/api/github/repo/contents/get', (req, res) => {
   let { filePath, username, repoName } = req.query;
-
   githubTools.ReadFileIntoMemory(username, repoName, filePath, (err, contents) => {
     if (err) {
       console.log('error in githubTools.ReadFileIntoMemory invocation: ', err);
