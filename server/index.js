@@ -51,7 +51,7 @@ app.post('/api/github/gists/get', (req, res) => {
         let fileNames = Object.keys(gist.files);
         let language = 'javascript';
         fileNames.forEach(file => {
-          if (gist.files[file].language.toLowerCase() !== 'javascript') language = file.language.toLowerCase()
+          if (gist.files[file] && gist.files[file].language && gist.files[file].language.toLowerCase() !== 'javascript') language = file.language.toLowerCase()
         });
         description = description === null ? '' : description;
         let gistObj = { id: id, description: description, files: gist.files, url: html_url,  language: language };
@@ -147,6 +147,17 @@ app.get('/api/github/repo/contents/get', (req, res) => {
       res.send(contents);
     }
   });
+});
+
+app.post('/api/github/repo/update', (req, res) => {
+  let { updatedFiles, repo, username, commitMessage, accessToken } = req.body;
+  let url = `https://api.github.com/repos/${username}/${repo.name}/contents/`;
+
+  axios.get(url, { params: { access_token: accessToken }, headers: { 'User-Agent': 'athesio' } })
+    .then(repo => {
+      let repoContents = repo.data;
+      res.send(repo.data)
+    });
 });
 
 const port = process.env.PORT || 3000;
