@@ -113,6 +113,7 @@ app.post('/api/github/gists/update', (req, res) => {
 
 
 app.post('/api/github/gists/create', (req, res) => {
+  console.log(req.body)
   let { accessToken, description, fileName, content } = req.body;
   
   let url = `https://api.github.com/gists`;
